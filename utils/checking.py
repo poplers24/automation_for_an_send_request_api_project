@@ -1,4 +1,5 @@
 from jsonschema import validate
+import requests
 import json
 
 """Schema Send request"""
@@ -271,7 +272,7 @@ class Checking():
     def check_time_response(result, time_response):
         assert time_response > result.elapsed.total_seconds(), f"Время ответа {result.elapsed.total_seconds()} - " \
                                                                f"больше ожидаемого {time_response}"
-        print(f"Время ответа не превышает ожидаемого - {result.elapsed.total_seconds()}")
+        print(f"Время ответа не превышает 500ms - {result.elapsed.total_seconds()}")
 
     """Метод проверки соответствия response body schema"""
     @staticmethod
@@ -290,3 +291,16 @@ class Checking():
     def check_number_object(result, number):
         assert len(result.json()['data']) == number, f"Количество объектов в теле ответа {len(result.json()['data'])}, что не соответствует ожидаемому {number}"
         print(f"Количество объектов в теле ответа корректное - {len(result.json()['data'])}")
+
+    @staticmethod
+    def check_redirect(result):
+        url = ""
+        status_code = str(result.history[0])[11:14]
+        for i, response in enumerate(result.history, 1):
+            url = response.url
+        assert url[:5] == "http:", f"Request sent not from http:, link_start = {url}"
+        assert status_code == "301", f"Status code is not correct {status_code}"
+        print(f"Запрос отправлен по http - {url}")
+        print(f"Статус код редиректа корректный - {status_code}")
+        print(f"Редирект на {result.url}")
+

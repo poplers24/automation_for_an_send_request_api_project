@@ -168,7 +168,7 @@ class Test_get_companies_list():
     """ Дефолтный запрос списка компаний"""
     def test_companies_default_request(self):
 
-        print(" Метод GET")
+        print(" Метод GET.CompaniesDefaultRequest")
         result_get = Send_request_api.get_companies()
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get, 0.5)
@@ -176,3 +176,15 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
         Checking.check_number_object(result_get, 3)
+
+    def test_companies_eneble_ssl(self):
+        base_url_http = "http://send-request.me"
+
+        print(" Метод GET.CompaniesEnableSSL")
+        result_get = Send_request_api.get_companies(base_url_http)
+        Checking.check_redirect(result_get)
+        Checking.check_header(result_get, "Connection", "keep-alive")
+        Checking.check_time_response(result_get, 0.5)
+        Checking.check_status_code(result_get, 200)
+
+
