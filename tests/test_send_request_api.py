@@ -2,8 +2,10 @@ import json
 
 from utils.api import Send_request_api
 from utils.checking import Checking
+import allure
 
 """Проверка запроса списка компаний, компаний и параметров запросов"""
+# @allure.epic("Test get company list")
 class Test_get_companies_list():
 
     # body response schema
@@ -166,25 +168,50 @@ class Test_get_companies_list():
     }
 
     """ Дефолтный запрос списка компаний"""
+    @allure.description("Test get list companies default request")
     def test_companies_default_request(self):
 
         print(" Метод GET.CompaniesDefaultRequest")
-        result_get = Send_request_api.get_companies()
+        result_get = Send_request_api.get_list_companies("/api/companies/")
         Checking.check_status_code(result_get, 200)
-        Checking.check_time_response(result_get, 0.5)
+        Checking.check_time_response(result_get)
         Checking.check_schema(result_get, self.schema_companyList)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
         Checking.check_number_object(result_get, 3)
 
+    @allure.description("Test companies eneble ssl")
     def test_companies_eneble_ssl(self):
-        base_url_http = "http://send-request.me"
-
         print(" Метод GET.CompaniesEnableSSL")
-        result_get = Send_request_api.get_companies(base_url_http)
+        result_get = Send_request_api.get_list_companies("/api/companies/", "http://send-request.me")
         Checking.check_redirect(result_get)
         Checking.check_header(result_get, "Connection", "keep-alive")
-        Checking.check_time_response(result_get, 0.5)
         Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_companyList)
+
+    @allure.description("Test get list companies with params limit and offset")
+    def test_companies_with_limit_and_offset(self):
+        print(" Метод GET.CompaniesWithLimitAndOffset")
+        result_get = Send_request_api.get_companies_with_query_parameters("/api/companies/", "limit=5", "offset=2")
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_number_object(result_get, 5)
+        Checking.check_list_start_company_id(result_get, 3)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+    @allure.description("Test get list companies with param company_status - ACTIVE")
+    def test_companies_with_status_active(self):
+        print(" Метод GET.CompaniesWithStatusActive")
+        result_get = Send_request_api.get_companies_with_query_parameters("/api/companies/", "status=ACTIVE", "limit=10")
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_company_status(result_get, 'ACTIVE')
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
 
 

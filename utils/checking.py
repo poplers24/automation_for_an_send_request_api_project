@@ -1,3 +1,4 @@
+import allure
 from jsonschema import validate
 import requests
 import json
@@ -260,38 +261,57 @@ schema_meResponse = {
 """Методы для проверки ответов запросов"""
 class Checking():
 
+
     """Метод для проверки статус кода"""
+
+    # @allure.step
     @staticmethod
     def check_status_code(result, status_code):
         assert status_code == result.status_code, f"Статус код ответа {result.status_code} - " \
                                                   f"не соответствует ожидаемому {status_code}"
         print(f"Статус код ответа соответствует ожидаемому - {result.status_code}")
 
+
     """Метод для проверки времени ответа"""
+
+    # @allure.step
     @staticmethod
-    def check_time_response(result, time_response):
-        assert time_response > result.elapsed.total_seconds(), f"Время ответа {result.elapsed.total_seconds()} - " \
-                                                               f"больше ожидаемого {time_response}"
+    def check_time_response(result):
+        expected_time = 0.5
+        assert expected_time > result.elapsed.total_seconds(), f"Время ответа {result.elapsed.total_seconds()} - " \
+                                                               f"больше ожидаемого {expected_time}"
         print(f"Время ответа не превышает 500ms - {result.elapsed.total_seconds()}")
 
+
     """Метод проверки соответствия response body schema"""
+
+    # @allure.step
     @staticmethod
     def check_schema(result, schema):
         validate(instance=result.json(), schema=schema)
         print("Тело ответа соответствует schema")
 
+
     """Метод проверки заголовков"""
+
+    # @allure.step
     @staticmethod
     def check_header(result, header, value):
         assert result.headers[header] == value, f"Значение {header}: {result.headers[header]}, что не соответствует ожидаемому {value}"
-        print(f"Заголовок {header} корректный - {result.headers[header]}")
+        print(f'Заголовок "{header}" корректный - {result.headers[header]}')
+
 
     """Метод проверки количества объектов в теле ответа"""
+
+    # @allure.step
     @staticmethod
     def check_number_object(result, number):
         assert len(result.json()['data']) == number, f"Количество объектов в теле ответа {len(result.json()['data'])}, что не соответствует ожидаемому {number}"
         print(f"Количество объектов в теле ответа корректное - {len(result.json()['data'])}")
 
+
+    """Метод проверки редиректа и статус кода редиректа"""
+    # @allure.step
     @staticmethod
     def check_redirect(result):
         url = ""
@@ -303,4 +323,22 @@ class Checking():
         print(f"Запрос отправлен по http - {url}")
         print(f"Статус код редиректа корректный - {status_code}")
         print(f"Редирект на {result.url}")
+
+    """Метод проверки, что список начинается с указанного id"""
+    # @allure.step
+    @staticmethod
+    def check_list_start_company_id(result, expected_start_id):
+        start_company_id = result.json()['data'][0]['company_id']
+        assert start_company_id == expected_start_id, f"The first company on the list company_id = {start_company_id}," \
+                                                      f"which is not what is expected - {expected_start_id}"
+        print(f"У первой компании ожидаемый company_id = {start_company_id}")
+
+    """Метод проверки статуса компании"""
+    @staticmethod
+    def check_company_status(result, expected_status):
+        data = result.json()['data']
+        for i in data:
+            assert i['company_status'] == expected_status, f"Company status {i['company_status']} is not expected {expected_status}"
+        print(f"В data присутствуют компании только со статусом {expected_status}")
+
 
