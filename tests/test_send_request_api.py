@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from utils.api import Send_request_api
 from utils.checking import Checking
 import allure
@@ -180,6 +182,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Connection", "keep-alive")
         Checking.check_number_object(result_get, 3)
 
+    """Отправляем запрос по незащищенному протоколу HTTP"""
     @allure.description("Test companies eneble ssl")
     def test_companies_eneble_ssl(self):
         print(" Метод GET.CompaniesEnableSSL")
@@ -190,6 +193,7 @@ class Test_get_companies_list():
         Checking.check_time_response(result_get)
         Checking.check_schema(result_get, self.schema_companyList)
 
+    """Проверяем корректность работы uqery-параметров limit и offset"""
     @allure.description("Test get list companies with params limit and offset")
     def test_companies_with_limit_and_offset(self):
         print(" Метод GET.CompaniesWithLimitAndOffset")
@@ -202,6 +206,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+    """Проверяем фильтрацию компаний по query-параметру status=ACTIVE"""
     @allure.description("Test get list companies with param company_status - ACTIVE")
     def test_companies_with_status_active(self):
         print(" Метод GET.CompaniesWithStatusActive")
@@ -214,6 +219,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+    """Проверяем фильтрацию компаний по query-параметру status=CLOSED"""
     @allure.description("Test get list companies with param company_status - CLOSED")
     def test_companies_with_status_closed(self):
         print(" Метод GET.CompaniesWithStatusClosed")
@@ -226,6 +232,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+    """Проверяем фильтрацию компаний по query-параметру status=BANKRUPT"""
     @allure.description("Test get list companies with param company_status - BANKRUPT")
     def test_companies_with_status_bankrupt(self):
         print(" Метод GET.CompaniesWithStatusBankrupt")
@@ -238,6 +245,48 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+    """Негативный тест - получить список компаний с невалидным значением параметра status=ABC"""
+    def test_companies_with_inv_query_status(self):
+        print(" Метод GET.CompaniesWithInvQueryStatus")
+        result_get = Send_request_api.get_companies_with_query_parameters("/api/companies/", "status=ABC")
+        Checking.check_status_code(result_get, 422)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+    """Негативный тест - получить список компаний с отрицательным значением параметра limit=-1"""
+    @pytest.mark.xfail(reason="gives an error on the status code - 200, expected - 422")
+    def test_companies_with_inv_query_limit(self):
+        print(" Метод GET.CompaniesWithInvQueryStatus")
+        result_get = Send_request_api.get_companies_with_query_parameters("/api/companies/", "limit=-1")
+        Checking.check_status_code(result_get, 422)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+    """Негативный тест - получить список компаний с невалидным значением параметра limit=ABC"""
+    def test_companies_with_str_query_limit(self):
+        print(" Метод GET.CompaniesWithStrQueryLimit")
+        result_get = Send_request_api.get_companies_with_query_parameters("/api/companies/", "limit=ABC")
+        Checking.check_status_code(result_get, 422)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+    """Негативный тест - получить список компаний с невалидным значением параметра limit=-1"""
+    def test_companies_with_inv_query_offset(self):
+        print(" Метод GET.CompaniesWithInvQueryOffset")
+        result_get = Send_request_api.get_companies_with_query_parameters("/api/companies/", "offset=-1")
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_list_start_company_id(result_get, 1)
+        Checking.check_number_object(result_get, 3)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
 
 
 
