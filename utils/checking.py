@@ -1,5 +1,6 @@
 import allure
 from jsonschema import validate
+from langdetect import detect
 import requests
 import json
 
@@ -257,6 +258,25 @@ schema_meResponse = {
         "valid_till"
     ]
 }
+schema_companyError = {
+        "type": "object",
+        "properties": {
+            "detail": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "reason"
+                ]
+            }
+        },
+        "required": [
+            "detail"
+        ]
+    }
 
 """Методы для проверки ответов запросов"""
 class Checking():
@@ -340,5 +360,21 @@ class Checking():
         for i in data:
             assert i['company_status'] == expected_status, f"Company status {i['company_status']} is not expected {expected_status}"
         print(f"В data присутствуют компании только со статусом {expected_status}")
+
+    """Метод проверки соответствия id в url и company_id в response body"""
+    @staticmethod
+    def check_company_id_in_response(result):
+        url_id = result.url.split('/')[-1]
+        company_id = result.json()['company_id']
+        assert url_id == str(company_id), f"В JSON company_id = {company_id} не совспадает id в url = {url_id} "
+        print(f"В JSON company_id, совпадает с id в URI")
+
+
+    @staticmethod
+    def check_language_in_response_body(result, lang):
+        description = detect(result.json()['description'])
+        assert description == lang, f"Язык в description - {description} не соответствует ожидаемому - {lang} "
+        print(f"Язык в description соответствует ожидаемому - {description}")
+
 
 

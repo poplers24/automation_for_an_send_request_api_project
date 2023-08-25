@@ -1,4 +1,5 @@
 import requests
+from requests import Session
 import allure
 from utils.logger import Logger
 
@@ -9,12 +10,31 @@ class Http_methods:
     cookie = ""
 
     @staticmethod
-    def get(url):
+    def get(url, additional_headers=None):
         # with allure.step('GET'):
         Logger.add_request(url, method="GET")
-        result = requests.get(url, headers=Http_methods.headers, cookies=Http_methods.cookie)
+
+        if additional_headers is None:
+            additional_headers = {}
+
+        all_headers = {**Http_methods.headers, **additional_headers}
+
+        result = requests.get(url, headers=all_headers, cookies=Http_methods.cookie)
         Logger.add_response(result)
         return result
+
+
+    @staticmethod
+    # def get_with_addition_headers(url, headers):
+    #     Logger.add_request(url, method="GET")
+    #     s = Session()
+    #     s.headers.update(headers)
+    #     result = requests.get(url, headers=Http_methods.headers, cookies=Http_methods.cookie)
+    #     prepped = result.prepare()
+    #     prepped.headers['Accept-Language'] = 'RU'
+    #     res = s.send(prepped)
+    #     Logger.add_response(result)
+    #     return result
 
     @staticmethod
     def post(url, body):
