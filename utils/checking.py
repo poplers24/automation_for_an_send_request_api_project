@@ -281,30 +281,26 @@ schema_companyError = {
 """Методы для проверки ответов запросов"""
 class Checking():
 
-
     """Метод для проверки статус кода"""
-
     # @allure.step
     @staticmethod
     def check_status_code(result, status_code):
-        assert status_code == result.status_code, f"Статус код ответа {result.status_code} - " \
-                                                  f"не соответствует ожидаемому {status_code}"
+        assert status_code == result.status_code, f"Status code response {result.status_code} - " \
+                                                  f"does not match expected - {status_code}"
         print(f"Статус код ответа соответствует ожидаемому - {result.status_code}")
 
 
     """Метод для проверки времени ответа"""
-
     # @allure.step
     @staticmethod
     def check_time_response(result):
         expected_time = 0.5
-        assert expected_time > result.elapsed.total_seconds(), f"Время ответа {result.elapsed.total_seconds()} - " \
-                                                               f"больше ожидаемого {expected_time}"
+        assert expected_time > result.elapsed.total_seconds(), f"Time response {result.elapsed.total_seconds()} - " \
+                                                               f"is longer than expected {expected_time}"
         print(f"Время ответа не превышает 500ms - {result.elapsed.total_seconds()}")
 
 
     """Метод проверки соответствия response body schema"""
-
     # @allure.step
     @staticmethod
     def check_schema(result, schema):
@@ -313,21 +309,19 @@ class Checking():
 
 
     """Метод проверки заголовков"""
-
     # @allure.step
     @staticmethod
     def check_header(result, header, value):
-        assert result.headers[header] == value, f"Значение {header}: {result.headers[header]}, что не соответствует ожидаемому {value}"
+        assert result.headers[header] == value, f"Value {header}: {result.headers[header]}, does not match expected - {value}"
         print(f'Заголовок "{header}" корректный - {result.headers[header]}')
 
 
     """Метод проверки количества объектов в теле ответа"""
-
     # @allure.step
     @staticmethod
-    def check_number_object(result, number):
-        assert len(result.json()['data']) == number, f"Количество объектов в теле ответа {len(result.json()['data'])}, что не соответствует ожидаемому {number}"
-        print(f"Количество объектов в теле ответа корректное - {len(result.json()['data'])}")
+    def check_quantity_object(result, expected_quantity_object):
+        assert len(result.json()['data']) == expected_quantity_object, f"Number of objects in response body - {len(result.json()['data'])}, does not match expected - {expected_quantity_object}"
+        print(f"Количество объектов в теле ответа соотвествует ожидаемому - {len(result.json()['data'])}")
 
 
     """Метод проверки редиректа и статус кода редиректа"""
@@ -347,11 +341,11 @@ class Checking():
     """Метод проверки, что список начинается с указанного id"""
     # @allure.step
     @staticmethod
-    def check_list_start_company_id(result, expected_start_id):
-        start_company_id = result.json()['data'][0]['company_id']
-        assert start_company_id == expected_start_id, f"The first company on the list company_id = {start_company_id}," \
+    def check_list_start_id(result, property_id, expected_start_id):
+        list_start_object = result.json()['data'][0][property_id]
+        assert list_start_object == expected_start_id, f"The first object on the list id = {list_start_object}," \
                                                       f"which is not what is expected - {expected_start_id}"
-        print(f"У первой компании ожидаемый company_id = {start_company_id}")
+        print(f"У первого объекта списка ожидаемый id = {list_start_object}")
 
     """Метод проверки статуса компании"""
     @staticmethod
@@ -366,15 +360,16 @@ class Checking():
     def check_company_id_in_response(result):
         url_id = result.url.split('/')[-1]
         company_id = result.json()['company_id']
-        assert url_id == str(company_id), f"В JSON company_id = {company_id} не совспадает id в url = {url_id} "
+        assert url_id == str(company_id), f"company_id = {company_id} in JSON does not match id in url = {url_id} "
         print(f"В JSON company_id, совпадает с id в URI")
 
-
+    """Метод проверки соответствия языка в description указанному языку"""
     @staticmethod
     def check_language_in_response_body(result, lang):
         description = detect(result.json()['description'])
-        assert description == lang, f"Язык в description - {description} не соответствует ожидаемому - {lang} "
+        assert description == lang, f"Language in description - {description} does not macth expected - {lang} "
         print(f"Язык в description соответствует ожидаемому - {description}")
+
 
 
 

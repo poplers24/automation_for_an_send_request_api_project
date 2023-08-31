@@ -8,18 +8,20 @@ base_url = "https://send-request.me" # Базовый url
 
 class Send_request_api():
 
-    """Запрос списка компаний"""
+    """Companies list"""
+
+    # Запрос списка компаний
     @staticmethod
-    def get_list_companies(endpoint, base_url=base_url):
+    def get_list(endpoint, base_url=base_url):
         get_url = base_url + endpoint
         print(get_url)
         result_get = Http_methods.get(get_url)
         print(result_get.text)
         return result_get
 
-    """Запрос списка компаний с параметрами"""
+    # Запрос списка компаний с параметрами
     @staticmethod
-    def get_companies_with_query_parameters(endpoint, *params, base_url=base_url):
+    def get_list_with_query_parameters(endpoint, *params, base_url=base_url):
         get_url = base_url + endpoint + "?"
         for i in params:
             if i == params[-1]:
@@ -31,17 +33,18 @@ class Send_request_api():
         print(result_get.text)
         return result_get
 
-    """Запрос компании по id"""
+    # Запрос компании по id
     @staticmethod
-    def get_company_by_id(endpiont, id, base_url=base_url):
+    def get_by_id(endpiont, id, base_url=base_url):
         get_url = base_url + endpiont + id
         print(get_url)
         result_get = Http_methods.get(get_url)
         print(result_get.text)
         return result_get
 
+    # Запрос компаний по id с доп. заголовками
     @staticmethod
-    def get_company_by_id_add_headers(endpiont, id, add_header, base_url=base_url):
+    def get_by_id_and_additional_header(endpiont, id, add_header, base_url=base_url):
         get_url = base_url + endpiont + id
         print(get_url)
         additional_headers = add_header
@@ -49,7 +52,6 @@ class Send_request_api():
         print(result_get.text)
         return result_get
 
-
-
+    """Users"""
 
 
