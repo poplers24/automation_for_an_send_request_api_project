@@ -23,19 +23,6 @@ class Http_methods:
         Logger.add_response(result)
         return result
 
-
-    @staticmethod
-    # def get_with_addition_headers(url, headers):
-    #     Logger.add_request(url, method="GET")
-    #     s = Session()
-    #     s.headers.update(headers)
-    #     result = requests.get(url, headers=Http_methods.headers, cookies=Http_methods.cookie)
-    #     prepped = result.prepare()
-    #     prepped.headers['Accept-Language'] = 'RU'
-    #     res = s.send(prepped)
-    #     Logger.add_response(result)
-    #     return result
-
     @staticmethod
     def post(url, body):
         # with allure.step('POST'):
@@ -53,7 +40,7 @@ class Http_methods:
         return result
 
     @staticmethod
-    def delete(url, body):
+    def delete(url, body=None):
         # with allure.step('DELETE'):
         Logger.add_request(url, method="DELETE")
         result = requests.delete(url, json=body, headers=Http_methods.headers, cookies=Http_methods.cookie)

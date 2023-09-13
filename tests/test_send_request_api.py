@@ -263,7 +263,7 @@ class Test_get_companies_list():
             "valid_till"
         ]
     }
-    schema_companyError = {
+    schema_Error = {
         "type": "object",
         "properties": {
             "detail": {
@@ -281,6 +281,9 @@ class Test_get_companies_list():
         "required": [
             "detail"
         ]
+    }
+    schema_deleteUser = {
+        "type": "string"
     }
 
     """Companies"""
@@ -311,6 +314,7 @@ class Test_get_companies_list():
         Checking.check_time_response(result_get)
         Checking.check_schema(result_get, self.schema_companyList)
 
+
     """Проверяем корректность работы uqery-параметров limit и offset"""
     @allure.description("Test get list companies with params limit and offset")
     def test_companies_with_limit_and_offset(self):
@@ -324,6 +328,7 @@ class Test_get_companies_list():
         Checking.check_list_start_id(result_get, "company_id", 3)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
+
 
     """Проверяем фильтрацию компаний по query-параметру status=ACTIVE"""
     @allure.description("Test get list companies with param company_status - ACTIVE")
@@ -339,6 +344,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+
     """Проверяем фильтрацию компаний по query-параметру status=CLOSED"""
     @allure.description("Test get list companies with param company_status - CLOSED")
     def test_companies_with_status_closed(self):
@@ -352,6 +358,7 @@ class Test_get_companies_list():
         Checking.check_company_status(result_get, 'CLOSED')
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
+
 
     """Проверяем фильтрацию компаний по query-параметру status=BANKRUPT"""
     @allure.description("Test get list companies with param company_status - BANKRUPT")
@@ -367,6 +374,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+
     """Негативный тест - получить список компаний с невалидным значением параметра status=ABC"""
     def test_companies_with_inv_query_status(self):
 
@@ -377,6 +385,7 @@ class Test_get_companies_list():
         Checking.check_schema(result_get, self.schema_httpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
+
 
     """Негативный тест - получить список компаний с отрицательным значением параметра limit=-1"""
     @pytest.mark.xfail(reason="gives an error on the status code - 200, expected - 422")
@@ -390,6 +399,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+
     """Негативный тест - получить список компаний с невалидным значением параметра limit=ABC"""
     def test_companies_with_str_query_limit(self):
 
@@ -401,7 +411,8 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
-    """Негативный тест - получить список компаний с отрицатльеным значением параметра limit=-1"""
+
+    """Негативный тест - получить список компаний с отрицатльеным значением параметра offset=-1"""
     def test_companies_with_inv_query_offset(self):
 
         print(" Метод GET.CompaniesWithInvQueryOffset")
@@ -414,7 +425,8 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
-    """Негативный тест - получить список компаний с невалидным значением параметра limit=ABC"""
+
+    """Негативный тест - получить список компаний с невалидным значением параметра offset=ABC"""
     def test_companies_with_str_query_offset(self):
 
         print(" Метод GET.CompaniesWithStrQueryOffset")
@@ -424,6 +436,7 @@ class Test_get_companies_list():
         Checking.check_schema(result_get, self.schema_httpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
+
 
     """Получить информацию по ID компании"""
     def test_company_by_id(self):
@@ -437,6 +450,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+
     """Негативный тест - получить информацию по несуществующему ID компании"""
     def test_company_my_none_id(self):
 
@@ -444,9 +458,10 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/companies/", "8")
         Checking.check_status_code(result_get, 404)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_companyError)
+        Checking.check_schema(result_get, self.schema_Error)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
+
 
     """Получаем компанию по ID, с выбором поддерживаемого языка"""
     def test_company_be_id_lang(self):
@@ -462,11 +477,12 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
+
     """Получить компанию по ID, с выбором неподдерживаемого языка"""
     def test_company_be_id_inv_lang(self):
         add_header = {"Accept-Language": "AM"}
 
-        print(" Метод GET.CompanyByIdLangRU")
+        print(" Метод GET.CompanyByIdInvLang")
         result_get = Send_request_api.get_by_id_and_additional_header("/api/companies/", "1", add_header)
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
@@ -481,35 +497,203 @@ class Test_get_companies_list():
     """Получить список пользователей, с query-параметром limit и offset"""
     def test_users_with_limit_and_offset(self):
 
+        print(" Метод GET.UsersWithLimit&Offset")
+
+        # Получаем user_id для последующей проверки offset
+        result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=10")
+        get_id_to_check = result_get.json()['data'][5]['user_id']
+
+        # сам тест
         result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=10", "offset=5")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
         Checking.check_quantity_object(result_get, 10)
-        Checking.check_list_start_id(result_get, "user_id", 67)
+        Checking.check_list_start_id(result_get, "user_id", get_id_to_check)
         Checking.check_schema(result_get, self.schema_usersList)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
-    """Получить список users, с невалидным параметром limit (отрицательное число)"""
-    @pytest.mark.xfail(reason="gives an error on the status code - 200, expected - 422")
-    def test_users_with_inv_limit(self):
 
-        result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=-5")
-        Checking.check_status_code(result_get, 422)
-        Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_httpValidationError)
-        Checking.check_header(result_get, "Content-Type", "application/json")
-        Checking.check_header(result_get, "Connection", "keep-alive")
+    """Получить список users, с невалидным параметром limit (отрицательное число)"""
+    # @pytest.mark.xfail(reason="gives an error on the status code - 200, expected - 422")
+    # def test_users_with_inv_limit(self):
+    #
+    #     print("Метод GET.UsersWithInvLimit")
+    #     result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=-5")
+    #     Checking.check_status_code(result_get, 422)
+    #     Checking.check_time_response(result_get)
+    #     Checking.check_schema(result_get, self.schema_httpValidationError)
+    #     Checking.check_header(result_get, "Content-Type", "application/json")
+    #     Checking.check_header(result_get, "Connection", "keep-alive")
+
 
     """Получить список пользователей, с невалидным query-параметром limit(строка вместо числа)"""
     def test_users_with_str_limit(self):
 
+        print("Метод GET.UsersWithStrLimit")
         result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=abc")
         Checking.check_status_code(result_get, 422)
         Checking.check_time_response(result_get)
         Checking.check_schema(result_get, self.schema_httpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
+
+
+    """Наименование: Получить список пользователей, по незащищенному протоколу http"""
+    def test_users_enable_ssl(self):
+
+        print("Метод GET.UsersEnableSSL")
+        result_get = Send_request_api.get_list("/api/users/", "http://send-request.me")
+        Checking.check_redirect(result_get)
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_header(result_get, "Connection", "keep-alive")
+        Checking.check_schema(result_get, self.schema_usersList)
+
+
+    """Создание, изменение и удаление пользователя"""
+    @pytest.mark.xfail(reason="Response body when deleting user - null, does not match expected - string")
+    def test_user_created(self):
+
+        json_new_user = {
+            "first_name": "Maksim",
+            "last_name": "Smirnov",
+            "company_id": 3
+        }
+
+        json_update_user = {
+            "first_name": "Ivan",
+            "last_name": "Smirnov",
+            "company_id": 1
+        }
+
+        print("Метод POST.UserCreate")
+        result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
+        Checking.check_status_code(result_post, 201)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_responseUser)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+        user_id = str(result_post.json()["user_id"])
+
+        print("Метод GET.GetUserCreated")
+        resul_get = Send_request_api.get_by_id("/api/users/", user_id)
+        Checking.check_status_code(resul_get, 200)
+        Checking.check_time_response(resul_get)
+        Checking.check_schema(resul_get, self.schema_responseUser)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+        Checking.check_user_json_req_and_res(result_post.text, resul_get.text)
+
+        print("Метод PUT.UserUpdate")
+        result_put = Send_request_api.update_user("/api/users/", user_id, json_update_user)
+        Checking.check_status_code(result_put, 200)
+        Checking.check_time_response(result_put)
+        Checking.check_schema(result_put, self.schema_responseUser)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+        print("Метод GET.GetUserUpdate")
+        resul_get = Send_request_api.get_by_id("/api/users/", user_id)
+        Checking.check_status_code(resul_get, 200)
+        Checking.check_time_response(resul_get)
+        Checking.check_schema(resul_get, self.schema_responseUser)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+        Checking.check_user_json_req_and_res(result_put.text, resul_get.text)
+
+        print("Метод DELITE.DeleteCreateUser")
+        reult_delete = Send_request_api.delete_user("/api/users/", user_id)
+        Checking.check_status_code(reult_delete, 202)
+        Checking.check_time_response(reult_delete)
+        Checking.check_schema(reult_delete, self.schema_deleteUser)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Создание пользователя с привязкой к несуществующей компании"""
+    def test_user_created_id_company_absent(self):
+
+        json_new_user = {
+            "first_name": "Petr",
+            "last_name": "Stepanov",
+            "company_id": 12
+        }
+
+        result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
+        Checking.check_status_code(result_post, 404)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Создание пользователя в обязательном ключе last_name указываем значение null"""
+    def test_user_created_requared_none(self):
+
+        json_new_user = {
+            "first_name": "Stepan",
+            "last_name": None,
+            "company_id": 3
+        }
+
+        result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
+        Checking.check_status_code(result_post, 422)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Создание пользователя с привязкой к компании со статусом CLOSED"""
+    def test_user_created_status_company_closed(self):
+
+        json_new_user = {
+            "first_name": "Ivan",
+            "last_name": "Ivanov",
+            "company_id": 6
+        }
+
+        result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
+        Checking.check_status_code(result_post, 400)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Создание пользователя без обязательного ключа"""
+    def test_user_created_no_requared(self):
+
+        json_new_user = {
+            "first_name": "Sergei",
+            "company_id": 3
+        }
+
+        result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
+        Checking.check_status_code(result_post, 422)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

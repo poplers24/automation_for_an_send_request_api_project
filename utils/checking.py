@@ -1,5 +1,6 @@
 import allure
 from jsonschema import validate
+from jsonschema.exceptions import ValidationError
 from langdetect import detect
 import requests
 import json
@@ -369,6 +370,12 @@ class Checking():
         description = detect(result.json()['description'])
         assert description == lang, f"Language in description - {description} does not macth expected - {lang} "
         print(f"Язык в description соответствует ожидаемому - {description}")
+
+    """"""
+    @staticmethod
+    def check_user_json_req_and_res(json_post, json_get):
+        assert json_get == json_post, f"User data requested {json_get} does not match with user data created {json_post}"
+        print("User совпадает")
 
 
 
