@@ -285,6 +285,17 @@ class Test_get_companies_list():
     schema_deleteUser = {
         "type": "string"
     }
+    schema_authorize = {
+        "type": "object",
+        "properties": {
+            "token": {
+            "type": "string"
+            }
+        },
+            "required": [
+            "token"
+          ]
+    }
 
     """Companies"""
 
@@ -785,6 +796,132 @@ class Test_get_companies_list():
         Checking.check_header(result_delete, "Content-Type", "application/json")
         Checking.check_header(result_delete, "Connection", "keep-alive")
 
+
+    """Вход с логином длиной 7 символов и валидным паролем"""
+
+    def test_auth_login_length_7_valid_pass(self):
+
+        json_body = {
+            "login": "Kirill7",
+            "password": "qwerty12345"
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 200)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_authorize)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Вход с логином длиной 1 символ и валидным паролем"""
+    def test_auth_login_length_1_valid_pass(self):
+
+        json_body = {
+            "login": "K",
+            "password": "qwerty12345"
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 422)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Вход с логином длиной 2 символа и валидным паролем"""
+    def test_auth_login_length_2_valid_pass(self):
+
+        json_body = {
+            "login": "Ki",
+            "password": "qwerty12345"
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 422)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Вход с пустым логином и валидным паролем"""
+    def test_auth_login_length_0_valid_pass(self):
+
+        json_body = {
+            "login": "",
+            "password": "qwerty12345"
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 422)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Вход без поля логин с валидным паролем"""
+    def test_auth_no_field_login_valid_pass(self):
+
+        json_body = {
+            "password": "qwerty12345"
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 422)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Вход с логином без пароля"""
+    def test_auth_valid_login_no_field_pass(self):
+
+        json_body = {
+            "login": "Kirill7"
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 422)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Вход с логином и неправильным паролем"""
+    def test_auth_valid_login_not_correct_pass(self):
+
+        json_body = {
+            "login": "Kirill7",
+            "password": "qwerty1234"
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 403)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Вход с логином и пустым паролем"""
+    def test_auth_valid_login_pass_0(self):
+
+        json_body = {
+            "login": "Kirill7",
+            "password": ""
+        }
+
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 403)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
 
 
 

@@ -92,5 +92,14 @@ class Send_request_api():
         print(result_delete.text)
         return result_delete
 
+    #AUTHORIZE
 
+    @staticmethod
+    def authorize(endpoint, json_body, base_url=base_url):
+
+        post_url = base_url + endpoint
+        print(post_url)
+        result_post = Http_methods.post(post_url, json_body)
+        print(result_post.text)
+        return result_post
 
