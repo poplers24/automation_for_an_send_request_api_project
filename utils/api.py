@@ -103,3 +103,15 @@ class Send_request_api():
         print(result_post.text)
         return result_post
 
+
+    @staticmethod
+    def get_user_with_token(endpoint, add_header, base_url=base_url):
+
+        get_url = base_url + endpoint
+        print(get_url)
+        additional_headers = add_header
+        result_get = Http_methods.get(get_url, additional_headers=additional_headers)
+        print(result_get.text)
+        return result_get
+
+

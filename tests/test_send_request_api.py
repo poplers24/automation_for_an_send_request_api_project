@@ -1,5 +1,6 @@
 import json
 import pytest
+from time import sleep
 
 from utils.api import Send_request_api
 from utils.checking import Checking
@@ -296,6 +297,8 @@ class Test_get_companies_list():
             "token"
           ]
     }
+
+    token = ""
 
     """Companies"""
 
@@ -797,8 +800,8 @@ class Test_get_companies_list():
         Checking.check_header(result_delete, "Connection", "keep-alive")
 
 
-    """Вход с логином длиной 7 символов и валидным паролем"""
-
+    """Получение токена. Вход с логином длиной 7 символов и валидным паролем и запрос ифнормации с полученным токеном"""
+    @pytest.mark.xfail(reason="the token field is not received in the response body, which does not correspond to the schema")
     def test_auth_login_length_7_valid_pass(self):
 
         json_body = {
@@ -806,12 +809,25 @@ class Test_get_companies_list():
             "password": "qwerty12345"
         }
 
+        # Авторизация
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 200)
         Checking.check_time_response(result_post)
         Checking.check_schema(result_post, self.schema_authorize)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
+
+        # Получаем токен
+        token = result_post.json()['token']
+        add_header = {'x-token': token}
+
+        # Запрашиваем информацию по токену
+        result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_meResponse)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
 
 
     """Вход с логином длиной 1 символ и валидным паролем"""
@@ -922,6 +938,81 @@ class Test_get_companies_list():
         Checking.check_schema(result_post, self.schema_Error)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
+
+
+    """Запрос информации по user с невалидным(несуществующим) token"""
+    def test_get_user_not_valid_token(self):
+
+        json_body = {
+            "login": "Kir",
+            "password": "qwerty12345"
+        }
+
+        # Авторизация
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 200)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_authorize)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+        # Получаем токен
+        token = result_post.json()['token']
+        # Изменяем токен
+        token_incorrect = token[0:-10] + "qwerty3BB"
+        print(token_incorrect)
+
+        add_header = {'x-token': token_incorrect}
+        result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
+        Checking.check_status_code(result_get, 403)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+
+    """Запрос информации по user с истекшим token"""
+    def test_get_user_expired_token(self):
+
+        json_body = {
+            "login": "Kir",
+            "password": "qwerty12345",
+            "timeout": 3
+        }
+
+        # Авторизация
+        result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
+        Checking.check_status_code(result_post, 200)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, self.schema_authorize)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+        # Получаем токен
+        token = result_post.json()['token']
+        # Изменяем токен
+
+        sleep(5)
+        add_header = {'x-token': token}
+        result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
+        Checking.check_status_code(result_get, 403)
+        # Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+
+    """запрос информации по user без token"""
+    def test_get_user_no_token(self):
+
+        add_header = {}
+        result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
+        Checking.check_status_code(result_get, 401)
+        # Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
 
 
 
