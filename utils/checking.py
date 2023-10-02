@@ -358,10 +358,10 @@ class Checking():
 
     """Метод проверки соответствия id в url и company_id в response body"""
     @staticmethod
-    def check_company_id_in_response(result):
+    def check_id_in_response(result, field_name_id):
         url_id = result.url.split('/')[-1]
-        company_id = result.json()['company_id']
-        assert url_id == str(company_id), f"company_id = {company_id} in JSON does not match id in url = {url_id} "
+        id = result.json()[field_name_id]
+        assert url_id == str(id), f"company_id = {id} in JSON does not match id in url = {url_id} "
         print(f"В JSON company_id, совпадает с id в URI")
 
     """Метод проверки соответствия языка в description указанному языку"""
@@ -371,10 +371,10 @@ class Checking():
         assert description == lang, f"Language in description - {description} does not macth expected - {lang} "
         print(f"Язык в description соответствует ожидаемому - {description}")
 
-    """"""
+    """Проверка соответствия отправленным данным и полученным"""
     @staticmethod
-    def check_user_json_req_and_res(json_post, json_get):
-        assert json_get == json_post, f"User data requested {json_get} does not match with user data created {json_post}"
+    def check_user_json_req_and_res(result_json_post, result_json_get):
+        assert result_json_get == result_json_post, f"User data requested {result_json_get} does not match with user data created {result_json_post}"
         print("User совпадает")
 
 

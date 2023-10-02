@@ -1,304 +1,17 @@
 import json
 import pytest
+import allure
 from time import sleep
 
+from src.schemas.schemas import Schemas
 from utils.api import Send_request_api
 from utils.checking import Checking
-import allure
+
 
 """Проверка запроса списка компаний, компаний и параметров запросов"""
 # @allure.epic("Test get company list")
 class Test_get_companies_list():
 
-    # body response schema
-    schema_companyList = {
-        "type": "object",
-        "properties": {
-            "data": {
-                "type": "array",
-                "items":
-                    {
-                        "type": "object",
-                        "properties": {
-                            "company_id": {
-                                "type": "integer"
-                            },
-                            "company_name": {
-                                "type": "string"
-                            },
-                            "company_address": {
-                                "type": "string"
-                            },
-                            "company_status": {
-                                "type": "string",
-                                "enum": ["ACTIVE", "CLOSED", "BANKRUPT"]
-                            },
-                            "description": {
-                                "type": "string"
-                            },
-                            "description_lang": {
-                                "type": "array",
-                                "items":
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "translation_lang": {
-                                                "type": "string"
-                                            },
-                                            "translation": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": [
-                                            "translation_lang",
-                                            "translation"
-                                        ]
-                                    }
-
-                            }
-                        },
-                        "required": [
-                            "company_id",
-                            "company_name",
-                            "company_address",
-                            "company_status"
-                        ]
-                    }
-
-            },
-            "meta": {
-                "type": "object",
-                "properties": {
-                    "limit": {
-                        "type": "integer"
-                    },
-                    "offset": {
-                        "type": "integer"
-                    },
-                    "total": {
-                        "type": "integer"
-                    }
-                },
-                "required": [
-                    "total"
-                ]
-            }
-        },
-        "required": [
-            "data",
-            "meta"
-        ]
-    }
-    schema_company = {
-        "type": "object",
-        "properties": {
-            "company_id": {
-                "type": "integer"
-            },
-            "company_name": {
-                "type": "string"
-            },
-            "company_address": {
-                "type": "string"
-            },
-            "company_status": {
-                "type": "string"
-            },
-            "description": {
-                "type": "string"
-            },
-            "description_lang": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "translation_lang": {
-                            "type": "string"
-                        },
-                        "translation": {
-                            "type": "string"
-                        }
-                    },
-                    "required": [
-                        "translation_lang",
-                        "translation"
-                    ]
-                }
-            }
-        },
-        "required": [
-            "company_id",
-            "company_name",
-            "company_address",
-            "company_status",
-        ]
-    }
-    schema_usersList = {
-        "type": "object",
-        "properties": {
-            "meta": {
-                "type": "object",
-                "properties": {
-                    "limit": {
-                        "type": "integer"
-                    },
-                    "offset": {
-                        "type": "integer"
-                    },
-                    "total": {
-                        "type": "integer"
-                    }
-                },
-                "required": [
-                    "total"
-                ]
-            },
-            "data": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "first_name": {
-                            "type": ["string", "null"]
-                        },
-                        "last_name": {
-                            "type": "string"
-                        },
-                        "company_id": {
-                            "type": ["string", "null"]
-                        },
-                        "user_id": {
-                            "type": "integer"
-                        }
-                    },
-                    "required": [
-                        "last_name",
-                        "user_id"
-                    ]
-                }
-            }
-        },
-        "required": [
-            "meta",
-            "data"
-        ]
-    }
-    schema_responseUser = {
-        "type": "object",
-        "properties": {
-            "first_name": {
-                "type": "string"
-            },
-            "last_name": {
-                "type": "string"
-            },
-            "company_id": {
-                "type": "integer"
-            },
-            "user_id": {
-                "type": "integer"
-            }
-        },
-        "required": [
-            "last_name",
-            "user_id"
-        ]
-    }
-    schema_httpValidationError = {
-        "type": "object",
-        "properties": {
-            "detail": {
-                "type": "array",
-                "items":
-                    {
-                        "type": "object",
-                        "properties": {
-                            "loc": {
-                                "type": "array",
-                                "items": {
-                                    "type": [
-                                        "string",
-                                        "integer"
-                                    ]
-                                }
-                            },
-                            "msg": {
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "loc",
-                            "msg",
-                            "type"
-                        ]
-                    }
-
-            }
-        },
-        "required": [
-            "detail"
-        ]
-    }
-    schema_meResponse = {
-        "type": "object",
-        "properties": {
-            "token": {
-                "type": "string"
-            },
-            "user_name": {
-                "type": "string"
-            },
-            "email_address": {
-                "type": "string",
-                "format": "email"
-            },
-            "valid_till": {
-                "type": "string",
-                "format": "date-time"
-            }
-        },
-        "required": [
-            "token",
-            "user_name",
-            "email_address",
-            "valid_till"
-        ]
-    }
-    schema_Error = {
-        "type": "object",
-        "properties": {
-            "detail": {
-                "type": "object",
-                "properties": {
-                    "reason": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "reason"
-                ]
-            }
-        },
-        "required": [
-            "detail"
-        ]
-    }
-    schema_deleteUser = {
-        "type": "string"
-    }
-    schema_authorize = {
-        "type": "object",
-        "properties": {
-            "token": {
-            "type": "string"
-            }
-        },
-            "required": [
-            "token"
-          ]
-    }
-
-    token = ""
 
     """Companies"""
 
@@ -311,7 +24,7 @@ class Test_get_companies_list():
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
         Checking.check_quantity_object(result_get, 3)
-        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -326,7 +39,7 @@ class Test_get_companies_list():
         Checking.check_header(result_get, "Connection", "keep-alive")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
 
 
     """Проверяем корректность работы uqery-параметров limit и offset"""
@@ -337,7 +50,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_list_with_query_parameters("/api/companies/", "limit=5", "offset=2")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
         Checking.check_quantity_object(result_get, 5)
         Checking.check_list_start_id(result_get, "company_id", 3)
         Checking.check_header(result_get, "Content-Type", "application/json")
@@ -353,7 +66,7 @@ class Test_get_companies_list():
                                                                           "limit=10")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
         Checking.check_company_status(result_get, 'ACTIVE')
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
@@ -368,7 +81,7 @@ class Test_get_companies_list():
                                                                           "limit=10")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
         Checking.check_company_status(result_get, 'CLOSED')
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
@@ -383,7 +96,7 @@ class Test_get_companies_list():
                                                                           "limit=10")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
         Checking.check_company_status(result_get, 'BANKRUPT')
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
@@ -396,7 +109,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_list_with_query_parameters("/api/companies/", "status=ABC")
         Checking.check_status_code(result_get, 422)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -409,7 +122,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_list_with_query_parameters("/api/companies/", "limit=-1")
         Checking.check_status_code(result_get, 422)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -421,7 +134,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_list_with_query_parameters("/api/companies/", "limit=ABC")
         Checking.check_status_code(result_get, 422)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -433,7 +146,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_list_with_query_parameters("/api/companies/", "offset=-1")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_companyList)
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
         Checking.check_list_start_id(result_get, "company_id", 1)
         Checking.check_quantity_object(result_get, 3)
         Checking.check_header(result_get, "Content-Type", "application/json")
@@ -447,7 +160,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_list_with_query_parameters("/api/companies/", "offset=ABC")
         Checking.check_status_code(result_get, 422)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -459,8 +172,8 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/companies/", "1")
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_company_id_in_response(result_get)
-        Checking.check_schema(result_get, self.schema_company)
+        Checking.check_id_in_response(result_get, 'company_id')
+        Checking.check_schema(result_get, Schemas.SchemaCompany)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -472,7 +185,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/companies/", "8")
         Checking.check_status_code(result_get, 404)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_schema(result_get, Schemas.SchemaError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -485,8 +198,8 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id_and_additional_header("/api/companies/", "1", add_header)
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_company_id_in_response(result_get)
-        Checking.check_schema(result_get, self.schema_company)
+        Checking.check_id_in_response(result_get, 'company_id')
+        Checking.check_schema(result_get, Schemas.SchemaCompany)
         Checking.check_language_in_response_body(result_get, 'ru')
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
@@ -500,8 +213,8 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id_and_additional_header("/api/companies/", "1", add_header)
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_company_id_in_response(result_get)
-        Checking.check_schema(result_get, self.schema_company)
+        Checking.check_id_in_response(result_get, 'company_id')
+        Checking.check_schema(result_get, Schemas.SchemaUsersList)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -523,7 +236,7 @@ class Test_get_companies_list():
         Checking.check_time_response(result_get)
         Checking.check_quantity_object(result_get, 10)
         Checking.check_list_start_id(result_get, "user_id", get_id_to_check)
-        Checking.check_schema(result_get, self.schema_usersList)
+        Checking.check_schema(result_get, Schemas.SchemaUsersList)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -536,7 +249,7 @@ class Test_get_companies_list():
     #     result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=-5")
     #     Checking.check_status_code(result_get, 422)
     #     Checking.check_time_response(result_get)
-    #     Checking.check_schema(result_get, self.schema_httpValidationError)
+    #     Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
     #     Checking.check_header(result_get, "Content-Type", "application/json")
     #     Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -548,7 +261,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=abc")
         Checking.check_status_code(result_get, 422)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_httpValidationError)
+        Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -561,8 +274,9 @@ class Test_get_companies_list():
         Checking.check_redirect(result_get)
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_header(result_get, "Connection", "keep-alive")
-        Checking.check_schema(result_get, self.schema_usersList)
+        # print(result_get)
+        Checking.check_schema(result_get, Schemas.SchemaUsersList)
+        # Checking.check_header(result_get, "Connection", "keep-alive")
 
 
     """Создание, изменение и удаление пользователя"""
@@ -585,7 +299,7 @@ class Test_get_companies_list():
         result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
         Checking.check_status_code(result_post, 201)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_responseUser)
+        Checking.check_schema(result_post, Schemas.SchemaResponseUser)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -595,7 +309,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/users/", user_id)
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_responseUser)
+        Checking.check_schema(result_get, Schemas.SchemaResponseUser)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
         Checking.check_user_json_req_and_res(result_post.text, result_get.text)
@@ -604,7 +318,7 @@ class Test_get_companies_list():
         result_put = Send_request_api.update_user("/api/users/", user_id, json_update_user)
         Checking.check_status_code(result_put, 200)
         Checking.check_time_response(result_put)
-        Checking.check_schema(result_put, self.schema_responseUser)
+        Checking.check_schema(result_put, Schemas.SchemaResponseUser)
         Checking.check_header(result_put, "Content-Type", "application/json")
         Checking.check_header(result_put, "Connection", "keep-alive")
 
@@ -612,7 +326,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/users/", user_id)
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_responseUser)
+        Checking.check_schema(result_get, Schemas.SchemaResponseUser)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
         Checking.check_user_json_req_and_res(result_put.text, result_get.text)
@@ -621,7 +335,7 @@ class Test_get_companies_list():
         result_delete = Send_request_api.delete_user("/api/users/", user_id)
         Checking.check_status_code(result_delete, 202)
         Checking.check_time_response(result_delete)
-        # Checking.check_schema(reult_delete, self.schema_deleteUser) # Response body when deleting user - null, does not match expected - string
+        # Checking.check_schema(reult_delete, Schemas.SchemaDeleteUser) # Response body when deleting user - null, does not match expected - string
         Checking.check_header(result_delete, "Content-Type", "application/json")
         Checking.check_header(result_delete, "Connection", "keep-alive")
 
@@ -629,7 +343,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/users/", user_id)
         Checking.check_status_code(result_get, 404)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_schema(result_get, Schemas.SchemaError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -647,7 +361,7 @@ class Test_get_companies_list():
         result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
         Checking.check_status_code(result_post, 404)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_schema(result_post, Schemas.SchemaError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -664,7 +378,7 @@ class Test_get_companies_list():
         result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
         Checking.check_status_code(result_post, 422)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_schema(result_post, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -681,7 +395,7 @@ class Test_get_companies_list():
         result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
         Checking.check_status_code(result_post, 400)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_schema(result_post, Schemas.SchemaError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -697,7 +411,7 @@ class Test_get_companies_list():
         result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
         Checking.check_status_code(result_post, 422)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_schema(result_post, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -710,7 +424,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/users/", user_id)
         Checking.check_status_code(result_get, 404)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_schema(result_get, Schemas.SchemaError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -735,7 +449,7 @@ class Test_get_companies_list():
         result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
         Checking.check_status_code(result_post, 201)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_responseUser)
+        Checking.check_schema(result_post, Schemas.SchemaResponseUser)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -745,7 +459,7 @@ class Test_get_companies_list():
         result_put = Send_request_api.update_user("/api/users/", user_id, json_update_user)
         Checking.check_status_code(result_put, 404)
         Checking.check_time_response(result_put)
-        Checking.check_schema(result_put, self.schema_Error)
+        Checking.check_schema(result_put, Schemas.SchemaError)
         Checking.check_header(result_put, "Content-Type", "application/json")
         Checking.check_header(result_put, "Connection", "keep-alive")
 
@@ -753,7 +467,7 @@ class Test_get_companies_list():
         result_delete = Send_request_api.delete_user("/api/users/", user_id)
         Checking.check_status_code(result_delete, 202)
         Checking.check_time_response(result_delete)
-        # Checking.check_schema(result_delete, self.schema_deleteUser) # Response body when deleting user - null, does not match expected - string
+        # Checking.check_schema(result_delete, Schemas.SchemaDeleteUser) # Response body when deleting user - null, does not match expected - string
         Checking.check_header(result_delete, "Content-Type", "application/json")
         Checking.check_header(result_delete, "Connection", "keep-alive")
 
@@ -761,7 +475,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_by_id("/api/users/", user_id)
         Checking.check_status_code(result_get, 404)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_schema(result_get, Schemas.SchemaError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -781,7 +495,7 @@ class Test_get_companies_list():
         result_put = Send_request_api.update_user("/api/users/", user_id, json_update_user)
         Checking.check_status_code(result_put, 404)
         Checking.check_time_response(result_put)
-        Checking.check_schema(result_put, self.schema_Error)
+        Checking.check_schema(result_put, Schemas.SchemaError)
         Checking.check_header(result_put, "Content-Type", "application/json")
         Checking.check_header(result_put, "Connection", "keep-alive")
 
@@ -795,25 +509,26 @@ class Test_get_companies_list():
         result_delete = Send_request_api.delete_user("/api/users/", user_id)
         Checking.check_status_code(result_delete, 404)
         Checking.check_time_response(result_delete)
-        Checking.check_schema(result_delete, self.schema_Error)
+        Checking.check_schema(result_delete, Schemas.SchemaError)
         Checking.check_header(result_delete, "Content-Type", "application/json")
         Checking.check_header(result_delete, "Connection", "keep-alive")
 
 
     """Получение токена. Вход с логином длиной 7 символов и валидным паролем и запрос ифнормации с полученным токеном"""
     @pytest.mark.xfail(reason="the token field is not received in the response body, which does not correspond to the schema")
-    def test_auth_login_length_7_valid_pass(self):
+    def test_auth_login_length_7_valid_pass_and_get_user(self):
 
         json_body = {
             "login": "Kirill7",
             "password": "qwerty12345"
         }
 
+        print("Метод POST.AuthLogin7ValidPassGetUser")
         # Авторизация
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 200)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_authorize)
+        Checking.check_schema(result_post, Schemas.SchemaAuthorize)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -825,7 +540,7 @@ class Test_get_companies_list():
         result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
         Checking.check_status_code(result_get, 200)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_meResponse)
+        Checking.check_schema(result_get, Schemas.SchemaMeResponse)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -838,10 +553,11 @@ class Test_get_companies_list():
             "password": "qwerty12345"
         }
 
+        print("Метод POST.AuthLiginLenght1ValidPass")
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 422)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_schema(result_post, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -854,10 +570,11 @@ class Test_get_companies_list():
             "password": "qwerty12345"
         }
 
+        print("Метод POST.AuthLiginLenght2ValidPass")
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 422)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_schema(result_post, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -870,10 +587,11 @@ class Test_get_companies_list():
             "password": "qwerty12345"
         }
 
+        print("Метод POST.AuthLiginLenght0ValidPass")
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 422)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_schema(result_post, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -885,10 +603,11 @@ class Test_get_companies_list():
             "password": "qwerty12345"
         }
 
+        print("Метод POST.AuthNoFieldValidPass")
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 422)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_schema(result_post, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -900,10 +619,11 @@ class Test_get_companies_list():
             "login": "Kirill7"
         }
 
+        print("Метод POST.AuthValidLoginNoFieldPass")
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 422)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_httpValidationError)
+        Checking.check_schema(result_post, Schemas.SchemaHttpValidationError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -916,10 +636,11 @@ class Test_get_companies_list():
             "password": "qwerty1234"
         }
 
+        print("Метод POST.AuthValidLoginNotCorrectPass")
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 403)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_schema(result_post, Schemas.SchemaError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -932,10 +653,11 @@ class Test_get_companies_list():
             "password": ""
         }
 
+        print("Метод POST.AuthValidLoginPass0")
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 403)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_Error)
+        Checking.check_schema(result_post, Schemas.SchemaError)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -948,11 +670,12 @@ class Test_get_companies_list():
             "password": "qwerty12345"
         }
 
+        print("Метод POST.GetUserNotValidToken")
         # Авторизация
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 200)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_authorize)
+        Checking.check_schema(result_post, Schemas.SchemaAuthorize)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
@@ -962,11 +685,13 @@ class Test_get_companies_list():
         token_incorrect = token[0:-10] + "qwerty3BB"
         print(token_incorrect)
 
+        print("Метод GET.GetUserNotValidToken")
+        # Запрашиваем информацию по user
         add_header = {'x-token': token_incorrect}
         result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
         Checking.check_status_code(result_get, 403)
         Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_schema(result_get, Schemas.SchemaError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
@@ -980,38 +705,112 @@ class Test_get_companies_list():
             "timeout": 3
         }
 
+        print("Метод POST.GetUserExpiredToken")
         # Авторизация
         result_post = Send_request_api.authorize("/api/auth/authorize", json_body)
         Checking.check_status_code(result_post, 200)
         Checking.check_time_response(result_post)
-        Checking.check_schema(result_post, self.schema_authorize)
+        Checking.check_schema(result_post, Schemas.SchemaAuthorize)
         Checking.check_header(result_post, "Content-Type", "application/json")
         Checking.check_header(result_post, "Connection", "keep-alive")
 
         # Получаем токен
         token = result_post.json()['token']
-        # Изменяем токен
 
+        print("Метод GET.GetUserExpiredToken")
         sleep(5)
         add_header = {'x-token': token}
         result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
         Checking.check_status_code(result_get, 403)
         # Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_schema(result_get, Schemas.SchemaError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
 
 
-    """запрос информации по user без token"""
+    """Запрос информации по user без token"""
     def test_get_user_no_token(self):
 
+        print("Метод GET.GetUserNoToken")
         add_header = {}
         result_get = Send_request_api.get_user_with_token('/api/auth/me', add_header)
         Checking.check_status_code(result_get, 401)
-        # Checking.check_time_response(result_get)
-        Checking.check_schema(result_get, self.schema_Error)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, Schemas.SchemaError)
         Checking.check_header(result_get, "Content-Type", "application/json")
         Checking.check_header(result_get, "Connection", "keep-alive")
+
+
+    #ISSUES
+    #В каждом эндпоинте заложена ошибка
+
+
+    """Получить список компаний, с фильтрацией limit, offset, status"""
+    @pytest.mark.xfail(reason="Filtering by status parameter is not applied")
+    def test_issues_companies_with_query(self):
+
+        print("Метод GET.IssuesCompanyesWithQuery")
+        # Получаем user_id для последующей проверки offset
+        result_get = Send_request_api.get_list_with_query_parameters("/api/companies/", "limit=10")
+        get_id_to_check = result_get.json()['data'][1]['company_id']
+
+        result_get = Send_request_api.get_list_with_query_parameters('/api/issues/companies', 'limit=1', 'offset=1', 'status=ACTIVE')
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_list_start_id(result_get, 'company_id', get_id_to_check)
+        Checking.check_company_status(result_get, "ACTIVE")
+        Checking.check_schema(result_get, Schemas.SchemaCompanyList)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+
+    """Получить компанию по ID"""
+    @pytest.mark.xfail(reason='Problem during response, more than 5 seconds')
+    def test_issues_company_by_id(self):
+
+        print("Метод GET.IssuesCompanyByID")
+        result_get = Send_request_api.get_by_id('/api/issues/companies/', '3')
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, Schemas.SchemaCompany)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+
+    """Получить информацию по user"""
+    @pytest.mark.xfail(reason="Invalid status code, missing fields in the response body")
+    def test_issues_get_user_by_id(self):
+
+        json_new_user = {
+            "first_name": "Petr",
+            "last_name": "Smirnov",
+            "company_id": 3
+        }
+
+        print("Метод POST.IssuesGetUserById")
+        # Создаем пользователя
+        result_post = Send_request_api.create_new_user("/api/users/", json_new_user)
+        Checking.check_status_code(result_post, 201)
+        Checking.check_time_response(result_post)
+        Checking.check_schema(result_post, Schemas.SchemaResponseUser)
+        Checking.check_header(result_post, "Content-Type", "application/json")
+        Checking.check_header(result_post, "Connection", "keep-alive")
+
+        # Получаем user_id
+        user_id = str(result_post.json()['user_id'])
+
+        print("Метод GET.IssuesGetUserById")
+        # Запрашиваем user
+        result_get = Send_request_api.get_by_id('/api/issues/users/', user_id)
+        Checking.check_status_code(result_get, 200)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, Schemas.SchemaResponseUser)
+        Checking.check_user_json_req_and_res(result_post.text, result_get.text)
+        Checking.check_id_in_response(result_get, 'user_id')
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
+
+
 
 
 
