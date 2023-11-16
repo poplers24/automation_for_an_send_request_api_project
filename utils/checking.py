@@ -8,13 +8,13 @@ import json
 
 
 """Методы для проверки ответов запросов"""
-class Checking():
+class Checking:
 
     """Метод для проверки статус кода"""
     # @allure.step
     @staticmethod
     def check_status_code(result, status_code):
-        assert status_code == result.status_code, f"Status code response {result.status_code} - " \
+        assert status_code == result.status_code, f"Status code response {result.status_code}, " \
                                                   f"does not match expected - {status_code}"
         print(f"Статус код ответа соответствует ожидаемому - {result.status_code}")
 

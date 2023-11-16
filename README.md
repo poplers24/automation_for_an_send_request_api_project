@@ -371,7 +371,7 @@ Name request: test_user_created_update_delete
 
 Step:
 
-1. Send a POST request to the endpoint /api/users/ with the request body: "first_name": "Ivan", "last_name": "Smirnov", "company_id": 1.
+1. Send a POST request to the endpoint /api/users/ with the request body: "first_name": "Maksim", "last_name": "Smirnov", "company_id": 3.
 2. Send a GET request to the endpoint /api/users/ with the user_id of the created user.
 3. Send a PUT request to the endpoint /api/users/ with the request body: "first_name": "Ivan", "last_name": "Smirnov", "company_id": 1.
 4. Send a GET request to the endpoint /api/users/ with the user_id of the created user.
@@ -380,4 +380,67 @@ Step:
 
 Checks:
 
+1.1. Request sent successfully;\
+1.2. Status code 201;\
+1.3. Server response time - does not exceed 500ms;\
+1.4. Response body matches the schema;\
+1.5. Response header "Content-Type" - "application/json";\
+1.6. Response header "Connection" - "keep-alive"
+
+2.1. Request sent successfully;\
+2.2. Status code 200;\
+2.3. Server response time - does not exceed 500ms;\
+2.4. Response body matches the schema;\
+2.5. Response header "Content-Type" - "application/json";\
+2.6. Response header "Connection" - "keep-alive"\
+2.7. User data in the response body matches the user data created.
+
+3.1. Request sent successfully;\
+3.2. Status code 200;\
+3.3. Server response time - does not exceed 500ms;\
+3.4. Response body matches the schema;\
+3.5. Response header "Content-Type" - "application/json";\
+3.6. Response header "Connection" - "keep-alive"
+
+4.1. Request sent successfully;\
+4.2. Status code 200;\
+4.3. Server response time - does not exceed 500ms;\
+4.4. Response body matches the schema;\
+4.5. Response header "Content-Type" - "application/json";\
+4.6. Response header "Connection" - "keep-alive"\
+4.7. User data in the response body matches the user data after modification.
+
+5.1. Request sent successfully;\
+5.2. Status code 202;\
+5.3. Server response time - does not exceed 500ms;\
+5.4. Response body matches the schema;\
+5.5. Response header "Content-Type" - "application/json";\
+5.6. Response header "Connection" - "keep-alive"\
+5.7. User data in the response body matches the user data created.
+
+6.1. Request sent successfully;\
+6.2. Status code 404;\
+6.3. Server response time - does not exceed 500ms;\
+6.4. Response body matches the schema;\
+6.5. Response header "Content-Type" - "application/json";\
+6.6. Response header "Connection" - "keep-alive"
+
+ID: PM-21
+
+Name: Creating a user with an attachment to a non-existent company
+
+Name request: test_user_created_id_company_absent
+
+Step: Send a POST request to the /api/users/ endpoint with the body: "first_name": "Petr", "last_name": "Stepanov", "company_id": 12
+
+Checks:
+
+1. The request was successfully sent
+2. Status code 404
+3. Server response time is within 500ms
+4. The JSON response contains a mandatory key, "detail"
+5. The "detail" key's value is an object with a field named "reason"
+6. The "reason" field's value is a string that indicates the absence of the company
+7. Response header "Content-Type" - "application/json"
+8. Response header "Connection" - "keep-alive"
 
