@@ -87,9 +87,9 @@ class TestGetCompaniesList:
         Checking.check_header(result_get, "Connection", "keep-alive")
 
 
-    """Негативный тест - получить список компаний с некорректными значениеми параметра offset и offset -1/ABC"""
+    """Негативный тест - получить список компаний с некорректными значениеми параметра offset - ABC/-1"""
     @pytest.mark.parametrize("value", inv_values_list_for_limit_and_offset)
-    def test_companies_with_str_query_offset(self, value):
+    def test_companies_with_inv_query_offset(self, value):
         if value == "-1":
             pytest.xfail(reason="Gives an error on the status code - 200, expected - 422")
 

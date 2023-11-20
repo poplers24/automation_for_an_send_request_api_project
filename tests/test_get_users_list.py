@@ -8,6 +8,8 @@ from utils.checking import Checking
 
 class TestGetUsersList:
 
+    inv_values_list_for_limit_and_offset = ["-1", "abc"]
+
     """Получить список пользователей, с query-параметром limit и offset"""
     def test_users_with_limit_and_offset(self):
 
@@ -28,24 +30,29 @@ class TestGetUsersList:
         Checking.check_header(result_get, "Connection", "keep-alive")
 
 
-    """Получить список users, с невалидным параметром limit (отрицательное число)"""
-    # @pytest.mark.xfail(reason="gives an error on the status code - 200, expected - 422")
-    # def test_users_with_inv_limit(self):
-    #
-    #     print("Метод GET.UsersWithInvLimit")
-    #     result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=-5")
-    #     Checking.check_status_code(result_get, 422)
-    #     Checking.check_time_response(result_get)
-    #     Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
-    #     Checking.check_header(result_get, "Content-Type", "application/json")
-    #     Checking.check_header(result_get, "Connection", "keep-alive")
+    """Получить список users, с невалидным параметром limit - ABC/-1"""
+    @pytest.mark.parametrize("value", inv_values_list_for_limit_and_offset)
+    def test_users_with_inv_limit(self, value):
+        if value == "-1":
+            pytest.xfail(reason="gives an error on the status code - 200, expected - 422")
+
+        print("Метод GET.UsersWithInvLimit")
+        result_get = Send_request_api.get_list_with_query_parameters("/api/users/", f"limit={value}")
+        Checking.check_status_code(result_get, 422)
+        Checking.check_time_response(result_get)
+        Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
+        Checking.check_header(result_get, "Content-Type", "application/json")
+        Checking.check_header(result_get, "Connection", "keep-alive")
 
 
-    """Получить список пользователей, с невалидным query-параметром limit(строка вместо числа)"""
-    def test_users_with_str_limit(self):
+    """Получить список пользователей, с невалидным query-параметром offset - ABC/-1"""
+    @pytest.mark.parametrize("value", inv_values_list_for_limit_and_offset)
+    def test_users_with_inv_offset(self, value):
+        if value == "-1":
+            pytest.xfail(reason="Gives an error on the status code - 200, expected - 422")
 
-        print("Метод GET.UsersWithStrLimit")
-        result_get = Send_request_api.get_list_with_query_parameters("/api/users/", "limit=abc")
+        print("Метод GET.UsersWithStrOffset")
+        result_get = Send_request_api.get_list_with_query_parameters("/api/users/", f"offset={value}")
         Checking.check_status_code(result_get, 422)
         Checking.check_time_response(result_get)
         Checking.check_schema(result_get, Schemas.SchemaHttpValidationError)
